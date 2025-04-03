@@ -4,6 +4,7 @@
 
 #define GPIOTE ((NRF_GPIOTE_REG*)0x40006000)
 
+
 typedef struct {
 	volatile uint32_t TASKS_OUT[8];
 	volatile uint32_t RESERVED0[4];
@@ -17,8 +18,10 @@ typedef struct {
 	volatile uint32_t RESERVED5[97];
 	volatile uint32_t INTENSET;
 	volatile uint32_t INTENCLR;
-	volatile uint32_t RESERVED3[129];
+	volatile uint32_t RESERVED6[129];
 	volatile uint32_t CONFIG[8];
 } NRF_GPIOTE_REG;
 
 #endif
+
+void gpiote_init();

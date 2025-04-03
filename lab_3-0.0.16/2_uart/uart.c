@@ -1,8 +1,8 @@
 
-#include <uart.h>
-#include <gpio.h>
+#include "uart.h"
+#include "gpio.h"
 #define __UART_BASE_ADDRESS__ 0x40002000
-#define GPIO ((NRF_GPIO_REGS*)__UART_BASE_ADDRESS__)
+#define UART ((NRF_UART_REG*)__UART_BASE_ADDRESS__)
 
 #define UART_TX 6
 #define UART_RX 8
@@ -50,7 +50,7 @@ typedef struct
 void uart_init(){ 
     //Brukes av GPIO
 	GPIO->PIN_CNF[UART_TX] = (1 << 0);
-    GPIO->PIN_CNF[UART_RX] = (1 << 0);
+    GPIO->PIN_CNF[UART_RX] = (0 << 0);
     //Brukes av UART
     UART->PSELTXD = UART_TX;
     UART->PSELRXD = UART_RX;
@@ -59,4 +59,46 @@ void uart_init(){
     UART->PSELCTS = ~0;
     UART->ENABLE = 8;
     UART->TASKS_STARTRX = 1;
+}
+void uart_send(char letter) {
+    UART->TASKS_STARTTX = 1;
+    UART->TXD = letter;
+    while(!(UART->EVENTS_TXDRDY));
+    UART->EVENTS_TXDRDY = 0;
+    UART->TASKS_STOPTX =1 ;
+}
+
+char uart_read(){
+    /*
+    char letter;
+    UART->EVENTS_RXDRDY = 0;
+    UART->TASKS_STARTRX = 1;
+
+    if (UART->EVENTS_RXDRDY){
+        letter = UART->RXD;
+        UART->EVENTS_RXDRDY = 0;
+    }
+    else
+    {
+        letter = '\0';
+    }
+    return letter;
+    */
+    UART->EVENTS_RXDRDY = 0;
+    UART->TASKS_STARTRX = 1;
+    char letter = '\0';
+
+    // Vent på at data skal være tilgjengelig
+    while (!(UART->EVENTS_RXDRDY)) {
+        // Kan ha en liten pause her hvis nødvendig
+    }
+
+    // Les data hvis tilgjengelig
+    letter = UART->RXD;
+
+    // Nullstill hendelsen
+    UART->EVENTS_RXDRDY = 0;
+
+    return letter;
+
 }
